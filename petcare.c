@@ -216,7 +216,7 @@ int main() {
         printf("2. Display all pets\n");
         printf("3. Delete pet\n");
         printf("4. Search pet \n");
-        printf("5. Recalculate bills\n");
+        printf("5.  \n");
         printf("6. Buy pet toys & accessories:\n");
         printf("7. Buypetfood\n");
         printf("0. Exit\n");
@@ -227,7 +227,7 @@ int main() {
             case 2: displaypets(); break;
             /*case 3: delete_pet(); break;
             case 4: Search_pet() ; break;
-            case 5: recalc_all_bills(); break;
+            case 5: ; break;
             case 6:pettoys(); break;
             case 7:PetFood();break;*/ 
             case 0:  return 0;
