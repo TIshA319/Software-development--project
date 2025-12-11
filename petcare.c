@@ -201,7 +201,111 @@ void Petinfo(){
 }
 
 
+/*
+Add by Seen --START--
+*/
 
+
+void pettoys() {
+    int choice, item;
+    float totalGoods = 0.0;
+    int more = 1;
+
+    while (more == 1) {
+        printf("\n--- Pet Goods Shop ---\n");
+        printf("1. Pet Food (300 tk)\n");
+        printf("2. Pet Toy (150 tk)\n");
+        printf("3. Shampoo (200 tk)\n");
+        printf("4. Collar (100 tk)\n");
+        
+        printf("Choose: ");
+        scanf("%d", &choice);
+
+
+        printf("Quantity: ");
+        scanf("%d", &item);
+
+        switch (choice) {
+            case 1: totalGoods += 300 * item; break;
+            case 2: totalGoods += 150 * item; break;
+            case 3: totalGoods += 200 * item; break;
+            case 4: totalGoods += 100 * item; break;
+            default: printf("Invalid choice!\n"); break;
+        }
+
+        printf("Add more goods? (1=yes, 0=no): ");
+        scanf("%d", &more);
+    }
+
+    printf("\nGoods purchased! Total amount: %.2f tk\n", totalGoods);
+}
+
+void PetFood() {
+    int choice, qty;
+    float totalFood = 0.0;
+    int more = 1;
+    float dogfood = 300.0f;
+    float catfood = 250.0f;
+    float fishfood = 150.0f;    
+    float birdfood = 200;
+    while (more == 1) {
+        printf("\n--- Pet Food Shop ---\n");
+        printf("1. Dog Food (300 tk)\n");
+        printf("2. Cat Food (250 tk)\n");
+        printf("3. Fish Food (150 tk)\n");
+        printf("4. Bird Food (200 tk)\n");
+        printf("Choose: ");
+        scanf("%d", &choice);
+
+        printf("Quantity (in packets): ");
+        scanf("%d", &qty);
+
+        switch (choice) {
+            case 1:
+                totalFood += dogfood * qty;
+                break;
+            case 2:
+                totalFood += catfood * qty;
+                break;
+            case 3:
+                totalFood += fishfood * qty;
+                break;
+            case 4:
+                totalFood += birdfood * qty;
+                break;
+            default:
+                printf("Invalid choice!\n");
+                break;
+        }
+
+        printf("Add more food? (1=yes, 0=no): ");
+        scanf("%d", &more);
+    }
+
+    printf("\nFood purchased! Total: %.2f tk\n", totalFood);
+}
+void displaypets() {
+    if (petCount == 0) {
+        printf("\nNo pets added yet.\n");
+        return;
+    }
+
+    printf("\n--- All Pets ---\n");
+
+    for (int i = 0; i < petCount; i++) {
+        if (pets[i].flag == 0) {  
+            printf("ID: %d\n", pets[i].id);
+            printf("Name: %s", pets[i].name);
+            printf("Category: %s", pets[i].category);
+            printf("Age: %d\n", pets[i].age);
+            printf("Owner: %s", pets[i].owner);
+            printf("------------------------------\n");
+        }
+    }
+}
+
+/*--END--
+*/
 
 
 int main() {
