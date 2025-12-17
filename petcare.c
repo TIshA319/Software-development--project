@@ -306,9 +306,43 @@ void displaypets() {
 
 /*--END--
 */
+/*
+Add by Seen --START--
+*/
 
+void Search_pet() {
+    int id;
+    int found = 0;
+
+    printf("\nEnter Pet ID to search: ");
+    scanf("%d", &id);
+    found = 1;
+
+    for (int i = 0; i < petCount; i++) {
+        if (pets[i].id == id && pets[i].flag == 0) {   
+
+            printf("\n--- Pet Found ---\n");
+            printf("ID: %d\n", pets[i].id);
+            printf("Name: %s", pets[i].name);
+            printf("Category: %s", pets[i].category);
+            printf("Age: %d\n", pets[i].age);
+            printf("Owner: %s", pets[i].owner);
+            printf("-----------------------\n");
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("\n No pet found with ID %d\n", id);
+    }
+}
+
+
+/*--END--*/ 
 
 int main() {
+    // Save all output to output.log
+    freopen("output.log", "a", stdout);
     int choice;
     int service;
     printf("Pet Care Management System\n");
