@@ -316,10 +316,9 @@ void Search_pet() {
 
     printf("\nEnter Pet ID to search: ");
     scanf("%d", &id);
-    found = 1;
 
     for (int i = 0; i < petCount; i++) {
-        if (pets[i].id == id && pets[i].flag == 0) {   
+        if (pets[i].id == id && pets[i].flag == 1) {   
 
             printf("\n--- Pet Found ---\n");
             printf("ID: %d\n", pets[i].id);
@@ -328,6 +327,7 @@ void Search_pet() {
             printf("Age: %d\n", pets[i].age);
             printf("Owner: %s", pets[i].owner);
             printf("-----------------------\n");
+            found = 1;
             break;
         }
     }
@@ -342,7 +342,7 @@ void Search_pet() {
 
 int main() {
     // Save all output to output.log
-    freopen("output.log", "a", stdout);
+    //freopen("output.log", "a", stdout);
     int choice;
     int service;
     printf("Pet Care Management System\n");
@@ -352,9 +352,9 @@ int main() {
         printf("\nMenu:\n");
         printf("1. Add new pet\n");
         printf("2. Display all pets\n");
-        printf("3. Delete pet\n");
+        //printf("3. Delete pet\n");
         printf("4. Search pet \n");
-        printf("5.  \n");
+        //printf("5.  \n");
         printf("6. Buy pet toys & accessories:\n");
         printf("7. Buypetfood\n");
         printf("0. Exit\n");
@@ -363,9 +363,9 @@ int main() {
         switch (choice) {
             case 1:Petinfo();break;
             case 2: displaypets(); break;
-            /*case 3: delete_pet(); break;
+            //case 3: delete_pet(); break;
             case 4: Search_pet() ; break;
-            case 5: ; break;*/
+            case 5: ; break;
             case 6:pettoys(); break;
             case 7:PetFood();break; 
             case 0:  return 0;
