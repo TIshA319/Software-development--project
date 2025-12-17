@@ -163,7 +163,7 @@ void Service(Pet *p){
 void Petinfo(){
     Pet p;
     p.id = nextId;
-    p.flag = 0;
+    p.flag = 1;
 
     p.Checkup = 0;
     p.Vaccine = 0;
@@ -293,7 +293,7 @@ void displaypets() {
     printf("\n--- All Pets ---\n");
 
     for (int i = 0; i < petCount; i++) {
-        if (pets[i].flag == 0) {  
+        if (pets[i].flag == 1) {  
             printf("ID: %d\n", pets[i].id);
             printf("Name: %s", pets[i].name);
             printf("Category: %s", pets[i].category);
@@ -331,9 +331,9 @@ int main() {
             case 2: displaypets(); break;
             /*case 3: delete_pet(); break;
             case 4: Search_pet() ; break;
-            case 5: ; break;
+            case 5: ; break;*/
             case 6:pettoys(); break;
-            case 7:PetFood();break;*/ 
+            case 7:PetFood();break; 
             case 0:  return 0;
             default: printf("Invalid.\n");
         }
