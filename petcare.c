@@ -3,7 +3,11 @@
 
 
 #define MAX_PETS 100
+#define MAX_ADOPT 50
 
+void remove_newline(char *s) {
+    s[strcspn(s, "\n")] = '\0';
+}
 
 typedef struct {
     int id;
@@ -81,9 +85,96 @@ float calculate_bill(Pet *p) {
     else if (p->Training == 3)
         printf("Training (Tricks): %.2f\n", tricks);
                
-    total += p->bill;
+    
     printf("Total bill: %.2f\n", total);
     return total;
+}
+
+Pet EmptyPet() {
+    Pet p = {0};   
+    return p;
+}
+
+void SavePetToFile(Pet *p) {
+    FILE *fp = fopen("pets.txt", "a");
+    if (!fp) {
+        printf("Error opening pets.txt\n");
+        return;
+    }
+
+    fprintf(fp, "id=%d\n", p->id);
+    fprintf(fp, "name=%s", p->name);
+    fprintf(fp, "category=%s", p->category);
+    fprintf(fp, "age=%d\n", p->age);
+    fprintf(fp, "owner=%s", p->owner);
+
+    
+    if (p->Checkup)
+        fprintf(fp, "checkup=1\n");
+
+    if (p->Vaccine)
+        fprintf(fp, "vaccine=1\n");
+
+    if (p->Hotel) {
+        fprintf(fp, "hotel=1\n");
+        fprintf(fp, "hotelDays=%d\n", p->hotelDays);
+    }
+
+    if (p->grooming)
+        fprintf(fp, "grooming=1\n");
+
+    if (p->Training)
+        fprintf(fp, "training=1\n");
+
+    
+    if (p->bill > 0)
+        fprintf(fp, "bill=%.2f\n", p->bill);
+
+    fprintf(fp, "active=%d\n", p->flag);
+    fprintf(fp, "--------------------\n");
+
+    fclose(fp);
+}
+
+void PetsFile() {
+    FILE *fp = fopen("pets.txt", "r");
+    if (!fp) return;
+
+    char line[100];
+    Pet p = EmptyPet();   
+
+    petCount = 0;
+    nextId = 1;
+
+    while (fgets(line, sizeof(line), fp)) {
+        line[strcspn(line, "\n")] = 0;
+
+        if (strcmp(line, "--------------------") == 0) {
+            pets[petCount++] = p;
+            if (p.id >= nextId) nextId = p.id + 1;
+
+            p = EmptyPet();  
+            continue;
+        }
+
+        sscanf(line, "id=%d", &p.id);
+        sscanf(line, "age=%d", &p.age);
+        sscanf(line, "hotelDays=%d", &p.hotelDays);
+        sscanf(line, "bill=%f", &p.bill);
+        sscanf(line, "active=%d", &p.flag);
+
+        sscanf(line, "name=%30[^\n]", p.name);
+        sscanf(line, "category=%20[^\n]", p.category);
+        sscanf(line, "owner=%30[^\n]", p.owner);
+
+        if (strcmp(line, "checkup=1") == 0) p.Checkup = 1;
+        if (strcmp(line, "vaccine=1") == 0) p.Vaccine = 1;
+        if (strcmp(line, "hotel=1") == 0) p.Hotel = 1;
+        if (strcmp(line, "grooming=1") == 0) p.grooming = 1;
+        if (strcmp(line, "training=1") == 0) p.Training = 1;
+    }
+
+    fclose(fp);
 }
 
 
@@ -161,6 +252,9 @@ void Service(Pet *p){
 }
 }
 void Petinfo(){
+    if (petCount >= MAX_PETS) {
+        printf("Pet list full!\n");
+        return;}
     Pet p;
     p.id = nextId;
     p.flag = 1;
@@ -196,178 +290,411 @@ void Petinfo(){
                
      p.bill = calculate_bill(&p);
      pets[petCount++] = p;
+     SavePetToFile(&p);
      nextId++;
 
 }
 
 
-/*
-Add by Seen --START--
-*/
+typedef struct {
+    int id;
+    char name[50];
+    float price;
+    int quantity;
+} Goods;
 
 
-void pettoys() {
-    int choice, item;
-    float totalGoods = 0.0;
-    int more = 1;
+int AdminLogin() {
+    FILE *fp = fopen("admin.txt", "r");
+    char fu[20], fpw[20];
 
-    while (more == 1) {
-        printf("\n--- Pet Goods Shop ---\n");
-        printf("1. Pet Food (300 tk)\n");
-        printf("2. Pet Toy (150 tk)\n");
-        printf("3. Shampoo (200 tk)\n");
-        printf("4. Collar (100 tk)\n");
-        
-        printf("Choose: ");
-        scanf("%d", &choice);
-
-
-        printf("Quantity: ");
-        scanf("%d", &item);
-
-        switch (choice) {
-            case 1: totalGoods += 300 * item; break;
-            case 2: totalGoods += 150 * item; break;
-            case 3: totalGoods += 200 * item; break;
-            case 4: totalGoods += 100 * item; break;
-            default: printf("Invalid choice!\n"); break;
-        }
-
-        printf("Add more goods? (1=yes, 0=no): ");
-        scanf("%d", &more);
+    if (!fp) {
+        fp = fopen("admin.txt", "w");
+        fprintf(fp, "admin 1234\n");
+        fclose(fp);
+        fp = fopen("admin.txt", "r");
     }
 
-    printf("\nGoods purchased! Total amount: %.2f tk\n", totalGoods);
+    fscanf(fp, "%19s %19s", fu, fpw);
+    fclose(fp);
+
+    char u[20], p[20];
+    printf("Admin ID: ");
+    scanf("%19s", u);
+    printf("Password: ");
+    scanf("%19s", p);
+
+    return strcmp(fu, u) == 0 && strcmp(fpw, p) == 0;
 }
 
-void PetFood() {
-    int choice, qty;
-    float totalFood = 0.0;
-    int more = 1;
-    float dogfood = 300.0f;
-    float catfood = 250.0f;
-    float fishfood = 150.0f;    
-    float birdfood = 200;
-    while (more == 1) {
-        printf("\n--- Pet Food Shop ---\n");
-        printf("1. Dog Food (300 tk)\n");
-        printf("2. Cat Food (250 tk)\n");
-        printf("3. Fish Food (150 tk)\n");
-        printf("4. Bird Food (200 tk)\n");
-        printf("Choose: ");
-        scanf("%d", &choice);
 
-        printf("Quantity (in packets): ");
-        scanf("%d", &qty);
-
-        switch (choice) {
-            case 1:
-                totalFood += dogfood * qty;
-                break;
-            case 2:
-                totalFood += catfood * qty;
-                break;
-            case 3:
-                totalFood += fishfood * qty;
-                break;
-            case 4:
-                totalFood += birdfood * qty;
-                break;
-            default:
-                printf("Invalid choice!\n");
-                break;
-        }
-
-        printf("Add more food? (1=yes, 0=no): ");
-        scanf("%d", &more);
-    }
-
-    printf("\nFood purchased! Total: %.2f tk\n", totalFood);
-}
-void displaypets() {
-    if (petCount == 0) {
-        printf("\nNo pets added yet.\n");
+void ViewStock() {
+    FILE *fp = fopen("goods.txt", "r");
+    if (!fp) {
+        printf("No goods available.\n");
         return;
     }
 
+    char line[200];
+    Goods g;
+
+    printf("\n--- GOODS STOCK ---\n");
+    while (fgets(line, sizeof(line), fp)) {
+        if (sscanf(line, "%d|%49[^|]|%f|%d",
+                   &g.id, g.name, &g.price, &g.quantity) == 4) {
+            printf("ID:%d Name:%s Price:%.2f Qty:%d\n",
+                   g.id, g.name, g.price, g.quantity);
+        }
+    }
+    fclose(fp);
+} 
+
+
+void AdminAddGoods() {
+    FILE *fp = fopen("goods.txt", "a");
+    if (!fp) return;
+
+    printf("Previous goods list");
+    ViewStock();
+    Goods g;
+    printf("Goods ID: ");
+    scanf("%d", &g.id); getchar();
+
+    printf("Goods Name: ");
+    fgets(g.name, 50, stdin); remove_newline(g.name);
+
+    printf("Price: ");
+    scanf("%f", &g.price);
+
+    printf("Quantity: ");
+    scanf("%d", &g.quantity);
+
+    fprintf(fp, "%d|%s|%.2f|%d\n", g.id, g.name, g.price, g.quantity);
+    fclose(fp);
+    printf("Goods added!\n");
+}
+
+
+
+void UpdateGoods() {
+    FILE *fp = fopen("goods.txt", "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    if (!fp || !temp) return;
+
+    int id, found = 0;
+    Goods g;
+    char line[200];
+
+    ViewStock();
+    printf("Enter Goods ID to update: ");
+    scanf("%d", &id); getchar();
+
+    while (fgets(line, sizeof(line), fp)) {
+        if (sscanf(line, "%d|%49[^|]|%f|%d",
+                   &g.id, g.name, &g.price, &g.quantity) == 4) {
+
+            if (g.id == id) {
+                found = 1;
+                printf("New Name: ");
+                fgets(g.name, 50, stdin); remove_newline(g.name);
+
+                printf("New Price: ");
+                scanf("%f", &g.price);
+
+                printf("New Quantity: ");
+                scanf("%d", &g.quantity); getchar();
+            }
+            fprintf(temp, "%d|%s|%.2f|%d\n",
+                    g.id, g.name, g.price, g.quantity);
+        }
+    }
+
+    fclose(fp);
+    fclose(temp);
+    remove("goods.txt");
+    rename("temp.txt", "goods.txt");
+
+    if (found) printf("Goods updated successfully!\n");
+    else printf("Goods not found!\n");
+}
+
+void BuyGoods() {
+    FILE *fp = fopen("goods.txt", "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    if (!fp || !temp) return;
+
+    Goods g;
+    int id, qty, found = 0;
+    float total = 0;
+    char line[200];
+
+    ViewStock();
+    printf("Enter Goods ID: ");
+    scanf("%d", &id);
+    printf("Quantity: ");
+    scanf("%d", &qty);
+
+    while (fgets(line, sizeof(line), fp)) {
+        if (sscanf(line, "%d|%49[^|]|%f|%d",
+                   &g.id, g.name, &g.price, &g.quantity) == 4) {
+
+            if (g.id == id && g.quantity >= qty) {
+                g.quantity -= qty;
+                total = g.price * qty;
+                found = 1;
+            }
+            fprintf(temp, "%d|%s|%.2f|%d\n",
+                    g.id, g.name, g.price, g.quantity);
+        }
+    }
+
+    fclose(fp);
+    fclose(temp);
+    remove("goods.txt");
+    rename("temp.txt", "goods.txt");
+
+    if (found) printf("Purchase successful! Total = %.2f tk\n", total);
+    else printf("Purchase failed!\n");
+}
+
+void  displaypets() {
+    FILE *fp = fopen("pets.txt", "r");
+    if (!fp) {
+        printf("No pet file found!\n");
+        return;
+    }
+
+    char line[200];
     printf("\n--- All Pets ---\n");
 
-    for (int i = 0; i < petCount; i++) {
-        if (pets[i].flag == 1) {  
-            printf("ID: %d\n", pets[i].id);
-            printf("Name: %s", pets[i].name);
-            printf("Category: %s", pets[i].category);
-            printf("Age: %d\n", pets[i].age);
-            printf("Owner: %s", pets[i].owner);
-            printf("------------------------------\n");
-        }
+    while (fgets(line, sizeof(line), fp)) {
+        printf("%s", line);
     }
+
+    fclose(fp);
 }
 
-/*--END--
-*/
-/*
-Add by Seen --START--
-*/
+void UpdatePet() {
+    FILE *fp = fopen("pets.txt", "r");
+    FILE *temp = fopen("temp.txt", "w");
 
-void Search_pet() {
-    int id;
-    int found = 0;
+    if (!fp || !temp) {
+        printf("File error!\n");
+        return;
+    }
 
-    printf("\nEnter Pet ID to search: ");
+    int id, found = 0;
+    char line[200];
+    char name[50], category[30], owner[50];
+    int age;
+
+    printf("Enter Pet ID to update: ");
+    scanf("%d", &id);
+    getchar();
+
+    printf("Enter new name: ");
+    fgets(name, sizeof(name), stdin);
+    remove_newline(name);
+
+    printf("Enter new category: ");
+    fgets(category, sizeof(category), stdin);
+    remove_newline(category);
+
+    printf("Enter new age: ");
+    scanf("%d", &age);
+    getchar();
+
+    printf("Enter new owner: ");
+    fgets(owner, sizeof(owner), stdin);
+    remove_newline(owner);
+
+    int updating = 0;
+
+    while (fgets(line, sizeof(line), fp)) {
+
+        int currentId;
+        if (sscanf(line, "id=%d", &currentId) == 1) {
+            if (currentId == id) {
+                found = 1;
+                updating = 1;
+
+                
+                fprintf(temp, "id=%d\n", id);
+
+                fprintf(temp, "name=%s\n", name);
+                fprintf(temp, "category=%s\n", category);
+                fprintf(temp, "age=%d\n", age);
+                fprintf(temp, "owner=%s\n", owner);
+
+                continue;
+            }
+        }
+
+        if (updating) {
+            if (strncmp(line, "name=", 5) == 0) continue;
+            if (strncmp(line, "category=", 9) == 0) continue;
+            if (strncmp(line, "age=", 4) == 0) continue;
+            if (strncmp(line, "owner=", 6) == 0) continue;
+
+            if (strcmp(line, "--------------------\n") == 0) {
+                updating = 0;
+            }
+        }
+
+        fprintf(temp, "%s", line);
+    }
+
+    fclose(fp);
+    fclose(temp);
+
+    remove("pets.txt");
+    rename("temp.txt", "pets.txt");
+
+    if (found)
+        printf("Pet updated successfully!\n");
+    else
+        printf("Pet ID not found!\n");
+}
+
+
+void DeletePet() {
+    FILE *fp = fopen("pets.txt", "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    if (!fp || !temp) {
+        printf("File error!\n");
+        return;
+    }
+
+    int id, found = 0;
+    char line[200];
+
+    printf("Enter Pet ID to delete: ");
     scanf("%d", &id);
 
-    for (int i = 0; i < petCount; i++) {
-        if (pets[i].id == id && pets[i].flag == 1) {   
+    int skip = 0;
+    while (fgets(line, sizeof(line), fp)) {
+        int currentId;
+        if (sscanf(line, "id=%d", &currentId) == 1) {
+            if (currentId == id) {
+                found = 1;
+                skip = 1; 
+                continue;
+            }
+        }
 
-            printf("\n--- Pet Found ---\n");
-            printf("ID: %d\n", pets[i].id);
-            printf("Name: %s", pets[i].name);
-            printf("Category: %s", pets[i].category);
-            printf("Age: %d\n", pets[i].age);
-            printf("Owner: %s", pets[i].owner);
-            printf("-----------------------\n");
-            found = 1;
-            break;
+        if (skip) {
+            if (strcmp(line, "--------------------\n") == 0) {
+                skip = 0;
+            }
+            continue; 
+        }
+
+        fprintf(temp, "%s", line); 
+    }
+
+    fclose(fp);
+    fclose(temp);
+
+    remove("pets.txt");
+    rename("temp.txt", "pets.txt");
+
+    if (found)
+        printf("Pet deleted successfully!\n");
+    else
+        printf("Pet ID not found!\n");
+}
+
+void Searchpet() {
+    FILE *fp = fopen("pets.txt", "r");
+    if (!fp) {
+        printf("No pet file found!\n");
+        return;
+    }
+
+    int id;
+    char line[200];
+    int found = 0;
+
+    printf("Enter Pet ID to search: ");
+    scanf("%d", &id);
+
+    while (fgets(line, sizeof(line), fp)) {
+        int currentId;
+        if (sscanf(line, "id=%d", &currentId) == 1) {
+            if (currentId == id) {
+                found = 1;
+                printf("\n--- Pet Found ---\n");
+                printf("%s", line); 
+
+               
+                while (fgets(line, sizeof(line), fp)) {
+                    printf("%s", line);
+                    if (strcmp(line, "--------------------\n") == 0) {
+                        break;
+                    }
+                }
+                break; 
+            }
         }
     }
 
-    if (!found) {
-        printf("\n No pet found with ID %d\n", id);
-    }
+    if (!found)
+        printf("Pet not found!\n");
+
+    fclose(fp);
 }
 
 
-/*--END--*/ 
 
 int main() {
-    // Save all output to output.log
-    //freopen("output.log", "a", stdout);
+    
     int choice;
-    int service;
+    PetsFile();
     printf("Pet Care Management System\n");
 
 
     while (1) {
         printf("\nMenu:\n");
         printf("1. Add new pet\n");
-        printf("2. Display all pets\n");
-        //printf("3. Delete pet\n");
-        printf("4. Search pet \n");
-        //printf("5.  \n");
-        printf("6. Buy pet toys & accessories:\n");
-        printf("7. Buypetfood\n");
+        printf("2. Admin Panel\n");
+        printf("3. Display all pets\n");
+        printf("4. Delete pet\n");
+        printf("5. Search pet \n");
+        printf("6. Update Pet info\n");
+        printf("7. Buygoods\n");
+        printf("8. Add Adopt Pet \n");
+        printf("9. Show Adoption \n");
+        printf("10.Adopt Pet \n");
         printf("0. Exit\n");
         printf("Choose: ");
         scanf("%d", &choice);
         switch (choice) {
             case 1:Petinfo();break;
-            case 2: displaypets(); break;
-            //case 3: delete_pet(); break;
-            case 4: Search_pet() ; break;
-            case 5: ; break;
-            case 6:pettoys(); break;
-            case 7:PetFood();break; 
+            case 2:
+                  if (AdminLogin()) {
+                int c;
+                do {
+                    printf("\n1.Add Goods\n2.View Stock\n3.Update Goods\n0.Back\nChoose: ");
+                    scanf("%d", &c);
+
+                    if (c == 1) AdminAddGoods();
+                    else if (c == 2) ViewStock();
+                    else if (c == 3) UpdateGoods();
+                } while (c != 0);
+            } else {
+                printf("Invalid login!\n");
+            }  ; break;
+            case 3: displaypets(); break;
+            case 4: DeletePet(); break;
+            case 5: Searchpet() ; break;
+            case 6:UpdatePet() ; break;
+            case 7:BuyGoods();break; 
+            case 8:AddAdoptablePet() ; break;
+            case 9:AdoptionList(); break;
+            case 10:AdoptPet(); break;
             case 0:  return 0;
             default: printf("Invalid.\n");
         }
