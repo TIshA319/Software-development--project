@@ -49,10 +49,10 @@ owner=Mike
 active=1
 --------------------
 id=7
-name=Lily
-category=cat
-age=4
-owner=Nina
+name=Lili
+category=Rabbit
+age=2
+owner=Ninaa
 checkup=1
 vaccine=1
 bill=1300.00

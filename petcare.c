@@ -646,13 +646,173 @@ void Searchpet() {
 
     fclose(fp);
 }
+typedef struct {
+    int id;
+    char name[31];
+    char category[21];
+    int age;
+    int available;  
+} AdoptablePet;
+
+AdoptablePet adoptList[MAX_ADOPT];
+int adoptCount = 0;
+int nextAdoptId = 1;
 
 
+
+void SaveAdoptableFile(AdoptablePet *p) {
+    FILE *fp = fopen("adopt.txt", "a");
+    if (!fp) return;
+
+    fprintf(fp, "id=%d\n", p->id);
+    fprintf(fp, "name=%s", p->name);
+    fprintf(fp, "category=%s", p->category);
+    fprintf(fp, "age=%d\n", p->age);
+    fprintf(fp, "available=%d\n", p->available);
+    fprintf(fp, "--------------------\n");
+
+    fclose(fp);
+}
+
+void Adoptablefile() {
+    FILE *fp = fopen("adopt.txt", "r");
+    if (!fp) return;
+
+    char line[100];
+    AdoptablePet p = {0};
+
+    adoptCount = 0;
+    nextAdoptId = 1;
+
+    while (fgets(line, sizeof(line), fp)) {
+        line[strcspn(line, "\n")] = 0;
+
+        if (strcmp(line, "--------------------") == 0) {
+            adoptList[adoptCount++] = p;
+            if (p.id >= nextAdoptId)
+                nextAdoptId = p.id + 1;
+            p = (AdoptablePet){0};
+            continue;
+        }
+
+        sscanf(line, "id=%d", &p.id);
+        sscanf(line, "age=%d", &p.age);
+        sscanf(line, "available=%d", &p.available);
+        sscanf(line, "name=%30[^\n]", p.name);
+        sscanf(line, "category=%20[^\n]", p.category);
+    }
+
+    fclose(fp);
+}
+
+void UpdateAdoptableFile() {
+    FILE *fp = fopen("adopt.txt", "w");
+    if (!fp) return;
+
+    for (int i = 0; i < adoptCount; i++) {
+        fprintf(fp, "id=%d\n", adoptList[i].id);
+        fprintf(fp, "name=%s", adoptList[i].name);
+        fprintf(fp, "category=%s", adoptList[i].category);
+        fprintf(fp, "age=%d\n", adoptList[i].age);
+        fprintf(fp, "available=%d\n", adoptList[i].available);
+        fprintf(fp, "--------------------\n");
+    }
+
+    fclose(fp);
+}
+void AddAdoptablePet() {
+    if (adoptCount >= MAX_ADOPT) {
+        printf("Adoption list full!\n");
+        return;
+    }
+
+    AdoptablePet p;
+    p.id = nextAdoptId++;
+    p.available = 1;
+
+    getchar();
+    printf("Pet Name: ");
+    fgets(p.name, sizeof(p.name), stdin);
+
+    printf("Category: ");
+    fgets(p.category, sizeof(p.category), stdin);
+
+    printf("Age: ");
+    scanf("%d", &p.age);
+
+    adoptList[adoptCount++] = p;
+    SaveAdoptableFile(&p);
+
+    printf("Pet added for adoption!\n");
+}
+
+void AdoptionList() {
+    int found = 0;
+
+    printf("\n--- Available Pets ---\n");
+    for (int i = 0; i < adoptCount; i++) {
+        if (adoptList[i].available) {
+            found = 1;
+           printf("ID: %d\n", adoptList[i].id);
+           printf("Name: %s\n", adoptList[i].name);
+           printf("Category: %s\n", adoptList[i].category);
+           printf("Age: %d\n", adoptList[i].age);
+           printf("--------------------\n");
+        }
+    }
+
+    if (!found)
+        printf("No pets available for adoption.\n");
+}
+
+void AdoptPet() {
+    char category[21];
+    int id, found = 0;
+
+    getchar();
+    printf("Enter category you want: ");
+    fgets(category, sizeof(category), stdin);
+    category[strcspn(category, "\n")] = 0;
+
+    printf("\n--- Matching Pets ---\n");
+    for (int i = 0; i < adoptCount; i++) {
+        if (adoptList[i].available &&
+            strcasecmp(adoptList[i].category, category) == 0) {
+
+           printf("ID: %d\n", adoptList[i].id);
+           printf("Name: %s\n", adoptList[i].name);
+           printf("Age: %d\n", adoptList[i].age);
+           printf("\n");
+            found = 1;
+
+        }
+    }
+
+    if (!found) {
+        printf("No pets found in this category.\n");
+        return;
+    }
+
+    printf("Enter ID to adopt: ");
+    scanf("%d", &id);
+
+    for (int i = 0; i < adoptCount; i++) {
+        if (adoptList[i].id == id && adoptList[i].available) {
+            adoptList[i].available = 0;
+            UpdateAdoptableFile();
+            printf("Pet adopted successfully!\n");
+            return;
+        }
+    }
+
+    printf("Invalid ID!\n");
+}
 
 int main() {
     
     int choice;
     PetsFile();
+    Adoptablefile();
     printf("Pet Care Management System\n");
 
 
